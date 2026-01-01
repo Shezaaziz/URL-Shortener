@@ -1,5 +1,7 @@
 const express=require("express");
+const path=require("path");
 const {connectMongodb}=require("./connections");
+const staticRoute=require("./routes/staticRouter");
 const URL = require("./models/url")
 const urlRoute=require("./routes/url");
 const app=express();
@@ -11,25 +13,29 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use("/url",urlRoute);
 
+app.set("view engine","ejs");
+app.set("views",path.resolve("./views"))
 
+app.use("/",staticRoute);
 app.get("/:shortId",async(req,res)=>{
- const shortId=req.params.shortId;
+ try {
+    const shortId = req.params.shortId;
 
+    const entry = await URL.findOneAndUpdate(
+      { shortId },
+      { $push: { visitHistory: { timestamp: Date.now() } } },
+      { new: true }
+    );
 
- const entry= await URL.findOneAndUpdate(
- {
-shortId
-},{ 
-    $push:{
-    visitHistory:{
-        timestamp:Date.now(),
+    if (!entry) {
+      return res.status(404).send("Short URL not found");
     }
 
-},
-},
- { new: true } 
-);
-res.redirect(entry.redirectURL);
+    res.redirect(entry.redirectURL);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Server Error");
+  }
 });
 
 
