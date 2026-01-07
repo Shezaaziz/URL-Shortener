@@ -15,6 +15,7 @@ shortId:{
     },
 
    visitHistory:[{timestamp:{type:Number}}],
+
 },{timestamps:true}
 );
 

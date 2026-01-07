@@ -1,7 +1,7 @@
 const express=require("express");
 const path=require("path");
 const cookieparser=require("cookie-parser");
-const {restrictToLoggedinUserOnly}=require("./middlewares/auth")
+const {checkForAuthentication,restrictTo}=require("./middlewares/auth")
 const {connectMongodb}=require("./connections");
 const staticRoute=require("./routes/staticRouter");
 const URL = require("./models/url")
@@ -14,11 +14,12 @@ const port=8001;
 connectMongodb("mongodb://localhost:27017/short-url");
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use("/url",restrictToLoggedinUserOnly, urlRoute);
+app.use("/url",restrictTo(["NORMAL"]), urlRoute);
 app.use("/user",userRoute);
 app.set("view engine","ejs");
 app.set("views",path.resolve("./views"))
 app.use(cookieparser());
+app.use(checkForAuthentication);
 
 app.use("/",staticRoute);
 app.get("/:shortId",async(req,res)=>{
