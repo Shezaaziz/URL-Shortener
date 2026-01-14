@@ -14,7 +14,7 @@ const port=8001;
 connectMongodb("mongodb://localhost:27017/short-url");
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use("/url",restrictTo(["NORMAL"]), urlRoute);
+app.use("/url",restrictTo(["NORMAL"],["ADMIN"]), urlRoute);
 app.use("/user",userRoute);
 app.set("view engine","ejs");
 app.set("views",path.resolve("./views"))
